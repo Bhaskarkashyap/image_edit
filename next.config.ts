@@ -1,9 +1,11 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     domains: ['pixabay.com'],
   },
+  experimental: {
+    allowedDevOrigins: ['*.csb.app'],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
