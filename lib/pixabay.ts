@@ -20,14 +20,7 @@ interface PixabayResponse {
     hits: PixabayImage[];
 }
 
-/**
- * Searches for images on Pixabay based on a query string.
- * @param query - The search term for images.
- * @param perPage - Number of results per page (default: 20).
- * @returns A promise resolving to an array of PixabayImage objects.
- * @throws Error if the API key is missing, query is invalid, or request fails.
- * 
- */
+
 export const searchImages = async (query: string, perPage: number = 20): Promise<PixabayImage[]> => {
 
     if (!PIXABAY_API_KEY) {

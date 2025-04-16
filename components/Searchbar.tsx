@@ -35,7 +35,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onClear }) => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8 pt-12">
+    <div className="w-full max-w-2xl mx-auto  pt-35">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
           <input
@@ -44,7 +44,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onClear }) => {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Search for images..."
-            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white-500"
           />
           {query && (
             <button
@@ -61,7 +61,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onClear }) => {
         </div>
         <button
           type="submit"
-          className="px-6 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-500 transition cursor-pointer "
+          className="px-6 py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition cursor-pointer "
         >
           Search
         </button>

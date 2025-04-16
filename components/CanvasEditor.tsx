@@ -13,17 +13,34 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [textColor, setTextColor] = useState('#000000'); // Default text color
+  const [textColor, setTextColor] = useState('#000000'); 
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !image) return;
+
+    // Set canvas dimensions based on image aspect ratio while fitting within viewport
+    const maxViewportWidth = window.innerWidth * 0.8;
+    const maxViewportHeight = window.innerHeight * 0.7;
+    
+    let canvasWidth = image.imageWidth;
+    let canvasHeight = image.imageHeight;
+    
+    // Scale down if image is larger than viewport
+    if (canvasWidth > maxViewportWidth || canvasHeight > maxViewportHeight) {
+      const widthRatio = maxViewportWidth / canvasWidth;
+      const heightRatio = maxViewportHeight / canvasHeight;
+      const scale = Math.min(widthRatio, heightRatio);
+      
+      canvasWidth *= scale;
+      canvasHeight *= scale;
+    }
 
     fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
-      width: 800,
-      height: 600,
+      width: canvasWidth,
+      height: canvasHeight,
     });
 
-    // Update color picker when text is selected
+   
     fabricCanvasRef.current.on('selection:created', (e) => {
       const activeObject = e.target;
       if (activeObject instanceof fabric.IText) {
@@ -37,10 +54,10 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
       }
     });
     fabricCanvasRef.current.on('selection:cleared', () => {
-      setTextColor('#000000'); // Reset to default
+      setTextColor('#000000'); 
     });
 
-    // Handle Delete key press to remove selected shape or text
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Delete' && fabricCanvasRef.current) {
         const activeObject = fabricCanvasRef.current.getActiveObject();
@@ -65,14 +82,21 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
       fabricCanvasRef.current?.dispose();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [image]);
 
   useEffect(() => {
     if (image && fabricCanvasRef.current) {
       fabric.Image.fromURL(image.largeImageURL, (img) => {
         if (!fabricCanvasRef.current) return;
-        img.scaleToWidth(800);
-        img.scaleToHeight(600);
+        
+        // Set image to cover the entire canvas (which is already sized to the image's aspect ratio)
+        img.set({
+          scaleX: fabricCanvasRef.current.getWidth() / img.width!,
+          scaleY: fabricCanvasRef.current.getHeight() / img.height!,
+          originX: 'left',
+          originY: 'top'
+        });
+        
         fabricCanvasRef.current.setBackgroundImage(img, () => {
           fabricCanvasRef.current?.renderAll();
         });
@@ -86,7 +110,7 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
       left: 100,
       top: 100,
       fontSize: 20,
-      fill: textColor, // Use selected color
+      fill: textColor, 
     });
     fabricCanvasRef.current.add(text);
     fabricCanvasRef.current.setActiveObject(text);
@@ -176,8 +200,8 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
   if (!image) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="p-8 rounded-xl shadow-lg max-w-4xl w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+      <div className="p-8 rounded-xl shadow-lg w-full" style={{ maxWidth: '90vw', maxHeight: '90vh' }}>
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-white">Edit</h2>
@@ -190,15 +214,21 @@ const CanvasEditor: React.FC<CanvasEditorProps> = ({ image, onClose }) => {
           </button>
         </div>
 
-        {/* Error Message */}
+      
         {error && (
           <p className="text-red-500 mb-4 text-sm">{error}</p>
         )}
 
-        {/* Canvas */}
-        <canvas ref={canvasRef} className="w-full border border-gray-300 rounded mb-6" />
+   
+        <div className="flex justify-center overflow-auto">
+          <canvas 
+            ref={canvasRef} 
+            className="border border-gray-300 rounded mb-6 "
+            style={{ maxWidth: '100%', maxHeight: '70vh' }}
+          />
+        </div>
 
-        {/* Action Buttons */}
+  
         <div className="flex flex-wrap gap-3 justify-start pt-5">
           <button
             onClick={addText}
