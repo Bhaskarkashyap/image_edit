@@ -15,10 +15,13 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<PixabayImage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false); 
 
   const handleSearch = async (query: string) => {
     setError(null);
     setLoading(true);
+    setHasSearched(true); 
+    setImages([]); 
     try {
       const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       if (!response.ok) {
@@ -35,9 +38,10 @@ export default function Home() {
   };
 
   const handleClear = () => {
-    setImages([]); // Clear images
-    setError(null); // Clear errors
-    setLoading(false); // Reset loading state
+    setImages([]);
+    setError(null); 
+    setLoading(false);
+    setHasSearched(false); 
   };
 
   return (
@@ -46,8 +50,16 @@ export default function Home() {
       <div className="w-full bg-white"></div>
       <SearchBar onSearch={handleSearch} onClear={handleClear} />
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      {loading && <p className="text-center">Loading...</p>}
-      {images.length > 0 ? (
+      {loading ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center pt-5"
+        >
+          <p>Loading...</p>
+        </motion.div>
+      ) : images.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,14 +68,16 @@ export default function Home() {
           <ImageResults images={images} onSelectImage={setSelectedImage} />
         </motion.div>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center pt-26"
-        >
-          <DefaultImages onSelectImage={setSelectedImage} />
-        </motion.div>
+        !hasSearched && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-center pt-26"
+          >
+            <DefaultImages onSelectImage={setSelectedImage} />
+          </motion.div>
+        )
       )}
       {selectedImage && (
         <CanvasEditor image={selectedImage} onClose={() => setSelectedImage(null)} />
